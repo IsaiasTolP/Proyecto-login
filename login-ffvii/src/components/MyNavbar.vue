@@ -9,6 +9,9 @@
         <router-link to="/signup">Registrarse</router-link>
       </li>
       <li v-if="isAuthenticated">
+        <router-link to="/profile">Perfil</router-link>
+      </li>
+      <li v-if="isAuthenticated">
         <button @click="handleLogout">Cerrar Sesión</button>
       </li>
     </ul>
@@ -18,7 +21,7 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import { useRouter } from 'vue-router';
-import { auth, signOut } from '../firebase'; // Asegúrate de importar desde el archivo correcto
+import { auth, signOut } from '../firebase';
 
 const isAuthenticated = inject('isAuthenticated');
 const logout: any = inject('logout');

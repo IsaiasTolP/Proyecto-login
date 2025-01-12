@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-// Importa las vistas
 import Login from '@/components/UserLogin.vue';
 import Signup from '@/components/UserSignup.vue';
 import MyShop from '@/components/MyShop.vue';
+import UserProfile from '@/views/UserProfile.vue';
 import { auth } from '@/firebase';
 
 // Configura las rutas
@@ -34,6 +34,12 @@ const routes = [
     path: '/shop',
     name: 'Shop',
     component: MyShop,
+    beforeEnter: requireAuth,
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: UserProfile,
     beforeEnter: requireAuth,
   },
 ];

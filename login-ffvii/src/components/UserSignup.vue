@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { auth, createUserWithEmailAndPassword } from '@/firebase'; // Firebase authentication
+import { auth, createUserWithEmailAndPassword } from '@/firebase';
 
 const email = ref('');
 const password = ref('');
