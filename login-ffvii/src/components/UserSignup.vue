@@ -48,15 +48,21 @@
 
       <button type="submit" :disabled="!isFormValid">Registrarse</button>
     </form>
+    <div v-if="message" class="message-box">
+      <p>{{ message }}</p>
+      <button @click="clearMessage">Cerrar</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { auth, createUserWithEmailAndPassword } from '@/firebase'; // Firebase authentication
 
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
+const message = ref('');
 
 const emailError = ref('');
 const passwordError = ref('');
@@ -87,15 +93,37 @@ const isFormValid = computed(
   () => !emailError.value && !passwordError.value && !confirmPasswordError.value
 );
 
-const handleRegister = () => {
+const handleRegister = async () => {
   validateEmail();
   validatePassword();
   validateConfirmPassword();
 
   if (isFormValid.value) {
-    alert('¡Registro exitoso!');
-    // Aquí puedes manejar el envío del formulario (e.g., llamada a una API).
+    try {
+      await createUserWithEmailAndPassword(auth, email.value, password.value);
+      message.value = '¡Registro exitoso!';
+      clearFields();
+    } catch (error: any) {
+      // Manejamos errores de Firebase (por ejemplo, email ya en uso)
+      if (error.code === 'auth/email-already-in-use') {
+        message.value = 'Este correo electrónico ya está registrado.';
+      } else if (error.code === 'auth/weak-password') {
+        message.value = 'La contraseña es demasiado débil.';
+      } else {
+        message.value = 'Hubo un error al registrarse. Inténtalo de nuevo.';
+      }
+    }
   }
+};
+
+const clearFields = () => {
+  email.value = '';
+  password.value = '';
+  confirmPassword.value = '';
+};
+
+const clearMessage = () => {
+  message.value = '';
 };
 </script>
 
@@ -121,5 +149,12 @@ button {
 button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+.message-box {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 5px;
 }
 </style>

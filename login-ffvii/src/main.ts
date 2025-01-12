@@ -7,4 +7,5 @@ import './assets/main.css'; // Estilos globales (opcional)
 const app = createApp(App);
 
 app.use(router); // Usa el router en la aplicación
+
 app.mount('#app');

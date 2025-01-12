@@ -32,17 +32,28 @@
 
       <button type="submit" :disabled="!isFormValid">Iniciar Sesión</button>
     </form>
+
+    <div v-if="message" class="message-box">
+      <p>{{ message }}</p>
+      <button @click="clearMessage">Cerrar</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, inject } from 'vue';
+import { auth } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const email = ref('');
 const password = ref('');
+const message = ref('');
 
 const emailError = ref('');
 const passwordError = ref('');
+
+const isAuthenticated = inject('isAuthenticated'); // Inyecta el estado de autenticación
+const generateToken = inject('generateToken'); // Inyecta la función para generar el token
 
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,14 +71,40 @@ const validatePassword = () => {
 
 const isFormValid = computed(() => !emailError.value && !passwordError.value);
 
-const handleLogin = () => {
+const handleLogin = async () => {
   validateEmail();
   validatePassword();
 
   if (isFormValid.value) {
-    alert('¡Inicio de sesión exitoso!');
-    // Aquí puedes manejar el envío del formulario (e.g., llamada a una API).
+    try {
+      await signInWithEmailAndPassword(auth, email.value, password.value);
+      message.value = '¡Inicio de sesión exitoso!';
+      isAuthenticated.value = true; // Actualiza el estado de autenticación
+      generateToken(); // Genera el token y almacena la expiración
+      clearFields();
+
+      window.location.href = '/shop';
+    } catch (error: any) {
+      // Manejar errores de Firebase (por ejemplo, usuario no encontrado o contraseña incorrecta)
+      if (error.code === 'auth/user-not-found') {
+        message.value =
+          'Usuario no encontrado. Verifica tu correo electrónico o regístrate.';
+      } else if (error.code === 'auth/wrong-password') {
+        message.value = 'Contraseña incorrecta.';
+      } else {
+        message.value = 'Hubo un error al iniciar sesión. Inténtalo de nuevo.';
+      }
+    }
   }
+};
+
+const clearFields = () => {
+  email.value = '';
+  password.value = '';
+};
+
+const clearMessage = () => {
+  message.value = '';
 };
 </script>
 
@@ -93,5 +130,12 @@ button {
 button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+.message-box {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 5px;
 }
 </style>

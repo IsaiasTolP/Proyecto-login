@@ -1,30 +1,46 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 // Importa las vistas
-import Login from '@/views/UserLogin.vue';
-import Signup from '@/views/UserSignup.vue';
+import Login from '@/components/UserLogin.vue';
+import Signup from '@/components/UserSignup.vue';
+import MyShop from '@/components/MyShop.vue';
+import { auth } from '@/firebase';
 
 // Configura las rutas
+const requireAuth = (to: any, from: any, next: any) => {
+  if (auth.currentUser) {
+    next();
+  } else {
+    next('/login');
+  }
+};
+
 const routes = [
   {
     path: '/',
-    redirect: '/login', // Redirigir a Login por defecto
+    redirect: '/login',
   },
   {
     path: '/login',
     name: 'Login',
-    component: Login, // Componente de Login
+    component: Login,
   },
   {
     path: '/Signup',
     name: 'Signup',
-    component: Signup, // Componente de Registro
+    component: Signup,
+  },
+  {
+    path: '/shop',
+    name: 'Shop',
+    component: MyShop,
+    beforeEnter: requireAuth,
   },
 ];
 
 // Crea el router
 const router = createRouter({
-  history: createWebHistory(), // Usa el modo de historial HTML5
+  history: createWebHistory(),
   routes,
 });
 
